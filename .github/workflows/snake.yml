@@ -1,14 +1,9 @@
-name: GitHub Snake Game
-
-
+name: GitHub Snake Game Contributions
 
 on:
-
-  # Schedule the workflow to run daily at midnight UTC
-
+  # Schedule the workflow to run multiple times per day to catch all contributions
   schedule:
-
-    - cron: "0 0 * * *"
+    - cron: "0 */6 * * *"  # Run every 6 hours
 
 
 
@@ -29,12 +24,12 @@ on:
 
 
 jobs:
-
   generate:
-
     runs-on: ubuntu-latest
-
-    timeout-minutes: 10
+    timeout-minutes: 15  # Increased timeout for better processing
+    concurrency:
+      group: snake-animation
+      cancel-in-progress: true  # This ensures only one workflow runs at a time
 
 
 
@@ -45,53 +40,36 @@ jobs:
       - name: Checkout Repository
 
         uses: actions/checkout@v3
-
-
-
-      # Step 2: Generate the snake animations
-
+      # Step 2: Generate the snake animations with improved settings
       - name: Generate GitHub Contributions Snake Animations
-
-        uses: Platane/snk@v3
-
+        uses: Platane/snk@v3.2.0
         with:
-
           # GitHub username to generate the animation for
-
           github_user_name: ${{ github.repository_owner }}
-
-
-
-          # Define the output files and their configurations
-
+          
+          # Configuration to ensure all commits are captured
+          github_api_token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Increase contributions captured
+          max_contributions_per_day: 24
+          
+          # Define the output files with optimized configurations for better visualization
           outputs: |
-
-            dist/github-snake.svg
-
-            dist/github-snake-dark.svg?palette=github-dark
-
-            dist/ocean.gif?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9
+            dist/github-snake.svg?color_snake=green&color_dots=#161b22,#0e4429,#006d32,#26a641,#39d353
+            dist/github-snake-dark.svg?palette=github-dark&color_snake=blue&color_dots=#161b22,#0e4429,#006d32,#26a641,#39d353
+            dist/ocean.gif?color_snake=green&color_dots=#161b22,#0e4429,#006d32,#26a641,#39d353
 
         env:
 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-
-      # Step 3: Deploy the generated files to the 'output' branch
-
+      # Step 3: Deploy the generated files to the 'output' branch with improved settings
       - name: Deploy to Output Branch
-
         uses: peaceiris/actions-gh-pages@v3
-
         with:
-
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
           publish_dir: ./dist
-
           publish_branch: output
-
-          # Optionally, you can set a custom commit message
-
-          commit_message: "Update snake animation [skip ci]"
+          force_orphan: true  # This ensures a clean history on the output branch
+          commit_message: "Update snake animation with all contributions [skip ci]"
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
